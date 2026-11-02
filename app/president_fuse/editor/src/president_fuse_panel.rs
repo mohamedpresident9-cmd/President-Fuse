@@ -389,4 +389,3 @@ impl EditorPlugin for PresidentFusePanel {
         self.pending_model = None;
     }
 }
-
