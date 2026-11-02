@@ -1,0 +1,72 @@
+name: Build installers
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Package (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            config: Packager.windows.toml
+          - os: ubuntu-latest
+            config: Packager.linux.toml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libxcb-shape0-dev libxcb-xfixes0-dev libxcb1-dev libxkbcommon-dev libasound2-dev libegl-mesa0 libfuse2 file patchelf squashfs-tools
+      - name: Install cargo-packager
+        run: cargo install cargo-packager --locked --version 0.11.8
+      - name: Build President Fuse
+        run: cargo build --locked --release --package editor
+        working-directory: app/president_fuse
+      - name: Prepare Windows package input
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item target/release/editor.exe dist/editor.exe
+        working-directory: app/president_fuse
+      - name: Prepare Linux package input
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p dist
+          cp target/release/editor dist/editor
+        working-directory: app/president_fuse
+      - name: Create installer packages
+        run: cargo packager --release --config ${{ matrix.config }}
+        working-directory: app/president_fuse
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: app/president_fuse/dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish release installers
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: installers-*
+          merge-multiple: true
+          path: release-files
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-files/*
+          generate_release_notes: true

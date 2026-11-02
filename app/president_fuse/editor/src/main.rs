@@ -3,14 +3,43 @@ mod president_fuse_panel;
 
 use fyroxed_base::{fyrox::core::log::Log, fyrox::event_loop::EventLoop, Editor, StartupData};
 use president_fuse_panel::PresidentFusePanel;
+use std::path::PathBuf;
+
+fn application_resources() -> PathBuf {
+    let executable_directory = std::env::current_exe()
+        .ok()
+        .and_then(|path| path.parent().map(ToOwned::to_owned));
+
+    if let Some(directory) = executable_directory {
+        let candidates = [
+            directory.join("data"),
+            directory.join("president-fuse").join("data"),
+            directory
+                .parent()
+                .unwrap_or(&directory)
+                .join("lib")
+                .join("president-fuse")
+                .join("data"),
+        ];
+        if let Some(resources) = candidates
+            .into_iter()
+            .find(|path| path.join("scene.rgs").is_file())
+        {
+            return resources;
+        }
+    }
+
+    std::env::current_dir().unwrap_or_default()
+}
 
 fn main() {
     Log::set_file_name("president_fuse.log");
 
     let event_loop = EventLoop::new().unwrap();
+    let resources = application_resources();
     let mut editor = Editor::new(Some(StartupData {
-        working_directory: Default::default(),
-        scenes: vec!["data/scene.rgs".into()],
+        working_directory: resources.clone(),
+        scenes: vec![resources.join("scene.rgs")],
         named_objects: false,
     }));
     editor.add_editor_plugin(PresidentFusePanel::default());

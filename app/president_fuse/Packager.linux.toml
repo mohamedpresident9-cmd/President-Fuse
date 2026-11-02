@@ -1,0 +1,14 @@
+name = "editor"
+product-name = "President Fuse"
+version = "0.1.0"
+identifier = "com.mohamedpresident9.presidentfuse"
+publisher = "President Fuse"
+category = "GraphicsAndDesign"
+out-dir = "dist"
+binaries-dir = "dist"
+binaries = [{ path = "editor", main = true }]
+resources = [{ src = "data/scene.rgs", target = "president-fuse/data/scene.rgs" }]
+formats = ["deb", "appimage"]
+
+[deb]
+depends = ["libasound2", "libxcb1", "libxcb-shape0", "libxcb-xfixes0", "libxkbcommon0"]

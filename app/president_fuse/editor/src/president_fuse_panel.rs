@@ -1,5 +1,5 @@
 use fyrox::asset::Resource;
-use fyrox::core::pool::Handle;
+use fyrox::core::{algebra::Matrix4, pool::Handle};
 use fyrox::engine::ApplicationLoopController;
 use fyrox::gui::{
     button::{Button, ButtonBuilder, ButtonMessage},
@@ -17,6 +17,13 @@ use fyrox::gui::{
     Orientation,
 };
 use fyrox::resource::model::{Model, ModelResourceExtension};
+use fyrox::scene::{
+    base::BaseBuilder,
+    mesh::{
+        surface::{SurfaceBuilder, SurfaceData, SurfaceResource},
+        MeshBuilder,
+    },
+};
 use fyroxed_base::{
     plugin::EditorPlugin,
     scene::{commands::graph::AddModelCommand, GameScene},
@@ -43,6 +50,7 @@ pub struct PresidentFusePanel {
     project_button: Handle<Button>,
     asset_kind_dropdown: Handle<DropdownList>,
     asset_button: Handle<Button>,
+    cube_button: Handle<Button>,
     animation_button: Handle<Button>,
     websites_button: Handle<Button>,
     status: Handle<Text>,
@@ -214,6 +222,33 @@ impl PresidentFusePanel {
             Err(error) => self.set_status(editor, format!("Could not open site: {error}")),
         }
     }
+
+    fn create_cube(&self, editor: &mut Editor) {
+        let scene_data = {
+            let entry = editor.scenes.current_scene_entry_mut();
+            let sender = entry.sender.clone();
+            entry
+                .controller
+                .downcast_mut::<GameScene>()
+                .map(|game_scene| (game_scene.scene, sender))
+        };
+        let Some((scene_handle, sender)) = scene_data else {
+            self.set_status(editor, "Open a 3D scene before creating a cube.");
+            return;
+        };
+
+        let scene = &mut editor.engine.scenes[scene_handle];
+        let cube = MeshBuilder::new(BaseBuilder::new().with_name("Cube"))
+            .with_surfaces(vec![SurfaceBuilder::new(SurfaceResource::new_embedded(
+                SurfaceData::make_cube(Matrix4::identity()),
+            ))
+            .build()])
+            .build(&mut scene.graph)
+            .to_base();
+        let sub_graph = scene.graph.take_reserve_sub_graph(cube);
+        sender.do_command(AddModelCommand::new(sub_graph));
+        self.set_status(editor, "Created a cube in the active scene. Use Fyrox's move, rotate, and scale tools to edit it.");
+    }
 }
 
 impl EditorPlugin for PresidentFusePanel {
@@ -264,6 +299,14 @@ impl EditorPlugin for PresidentFusePanel {
         )
         .with_text("Add 3D Asset to Library")
         .build(&mut context);
+        self.cube_button = ButtonBuilder::new(
+            WidgetBuilder::new()
+                .with_width(290.0)
+                .with_height(30.0)
+                .with_margin(fyrox::gui::Thickness::uniform(3.0)),
+        )
+        .with_text("Create Cube")
+        .build(&mut context);
         self.animation_button = ButtonBuilder::new(
             WidgetBuilder::new()
                 .with_width(290.0)
@@ -293,6 +336,7 @@ impl EditorPlugin for PresidentFusePanel {
                 .with_child(self.project_button)
                 .with_child(self.asset_kind_dropdown)
                 .with_child(self.asset_button)
+                .with_child(self.cube_button)
                 .with_child(self.animation_button)
                 .with_child(self.websites_button)
                 .with_child(self.status),
@@ -300,7 +344,7 @@ impl EditorPlugin for PresidentFusePanel {
         .with_orientation(Orientation::Vertical)
         .build(&mut context);
 
-        self.window = WindowBuilder::new(WidgetBuilder::new().with_width(330.0).with_height(260.0))
+        self.window = WindowBuilder::new(WidgetBuilder::new().with_width(330.0).with_height(300.0))
             .with_title(WindowTitle::text("President Fuse"))
             .with_content(content)
             .open(false)
@@ -353,6 +397,8 @@ impl EditorPlugin for PresidentFusePanel {
                 self.open_selector(editor, DialogPurpose::AssetFile);
             } else if message.destination() == self.animation_button {
                 self.open_selector(editor, DialogPurpose::AnimationFile);
+            } else if message.destination() == self.cube_button {
+                self.create_cube(editor);
             } else if message.destination() == self.websites_button {
                 self.open_animation_website(editor);
             }

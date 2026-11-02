@@ -13,6 +13,8 @@
 
 This repository contains a generated Fyrox 3D editor/game-plugin starter under `app/president_fuse`, initial product specifications, a project panel, and a native project-manifest API. Users can create/open projects and copy 3D or animation files into the project's asset library. The custom 3D authoring workflows are still at an early foundation stage; this is not yet the finished asset editor.
 
+The current editor can create a starter cube, import supported GLB/glTF/FBX models into an open 3D scene, and import animation files into the project library. Full character/animal rig authoring, skin weighting, animation decoding/retargeting, and the broader modeling toolkit remain in development.
+
 ## Documents
 
 - [Product requirements](docs/PRODUCT_REQUIREMENTS.md)
@@ -22,7 +24,11 @@ This repository contains a generated Fyrox 3D editor/game-plugin starter under `
 
 ## Build check
 
-The `editor` project passed `cargo check --locked` on Windows. A GitHub Actions workflow is included to check the editor project on both Windows and Linux.
+The `editor` project is checked on Windows and Linux by GitHub Actions. Tagged versions build a Windows NSIS installer and Linux `.deb` and AppImage packages, then publish them as GitHub Releases. Installers are unsigned until signing credentials are configured.
+
+## Install
+
+Download the Windows `.exe` installer or Linux `.deb`/`.AppImage` file from [GitHub Releases](https://github.com/mohamedpresident9-cmd/President-Fuse/releases). The Linux `.deb` can be installed with the distribution's software installer; for AppImage, mark the file as executable and launch it. Release installers are generated from version tags such as `v0.1.0`.
 
 ## Initial technology direction
 

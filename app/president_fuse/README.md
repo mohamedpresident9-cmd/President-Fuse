@@ -10,13 +10,15 @@ Install the Rust toolchain and the platform dependencies required by Fyrox, then
 cargo run --package editor --release
 ```
 
-The generated project also includes executor and export-cli packages. The editor panel currently lets a user select a project folder, choose an asset category, add supported 3D files to its library, or choose an animation file from the computer.
+The generated project also includes executor and export-cli packages. The editor panel lets a user select a project folder, choose an asset category, create a cube, import GLB/glTF/FBX models into an open 3D scene, or choose an animation file from the computer.
+
+Tagged releases build a Windows NSIS installer and Linux Debian/AppImage packages. The packaged editor locates its bundled starter scene relative to the installed application.
 
 ## Project metadata and domain model
 
 The `game` crate contains product-level types and a versioned TOML project manifest. `ProjectManifest::create`, `load`, and `save` maintain `.pfuse/project.toml`; `import_asset` copies selected files into `.pfuse/assets` and registers them.
 
-Animation file selection currently copies the file into the project library; clip decoding, preview, and rig retargeting are not implemented yet. Website shortcuts are stored in the project manifest, and the panel opens the first configured HTTP(S) shortcut.
+Animation file selection currently copies the file into the project library; clip decoding, preview, and rig retargeting are not implemented yet. Character/animal rig authoring and skin weighting are also not available yet. Website shortcuts are stored in the project manifest, and the panel opens the first configured HTTP(S) shortcut.
 
 Add website shortcuts to `.pfuse/project.toml` like this, then reopen the project in the panel:
 

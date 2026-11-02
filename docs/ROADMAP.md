@@ -6,7 +6,7 @@
 - Prototype the selected Rust engine/editor integration and project save/load.
 - Define the native project schema and initial GLB/glTF support boundaries.
 
-**Progress:** Fyrox template generated; project panel, asset category selection, versioned TOML manifest, create/load/save, local asset copying/catalog, and configured animation-site launching implemented. Editor passes Windows `cargo check --locked`.
+**Progress:** Fyrox template generated; project panel, asset category selection, versioned TOML manifest, create/load/save, local asset copying/catalog, configured animation-site launching, Windows/Linux CI, and tagged Windows/Linux installer workflow implemented.
 
 **Exit:** Windows and Linux CI checks pass and the application opens a project in the editor.
 
@@ -15,6 +15,8 @@
 - Project browser, 3D viewport, hierarchy, selection, and basic transforms.
 - Undo/redo for supported edits and reliable save/reopen behavior.
 - Import/export GLB/glTF and report unsupported content clearly.
+
+**Progress:** Starter cube creation and asynchronous GLB/glTF/FBX placement into an open 3D scene are wired through Fyrox scene commands. Import/export round-tripping and broader mesh editing remain open.
 
 **Exit:** a user can import a scene, make basic edits, save it, reopen it, and export a usable asset.
 
