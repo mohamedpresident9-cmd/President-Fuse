@@ -1,0 +1,17 @@
+# Rust build output and downloaded Cargo cache
+/target/
+/app/president_fuse/target/
+/.cargo-home/
+/.build-tmp/
+
+# Local tool used to generate the initial Fyrox template
+/tools/
+
+# Editor-generated local state
+*.log
+*.user
+*.bak
+
+# Never commit local signing credentials from the generated Android template
+**/release.keystore
+
