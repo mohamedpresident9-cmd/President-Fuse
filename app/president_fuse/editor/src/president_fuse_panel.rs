@@ -1,5 +1,6 @@
 use fyrox::asset::Resource;
 use fyrox::core::pool::Handle;
+use fyrox::engine::ApplicationLoopController;
 use fyrox::gui::{
     button::{Button, ButtonBuilder, ButtonMessage},
     dock::DockingManagerMessage,
@@ -17,7 +18,7 @@ use fyrox::gui::{
 };
 use fyrox::resource::model::{Model, ModelResourceExtension};
 use fyroxed_base::{
-    plugin::{ApplicationLoopController, EditorPlugin},
+    plugin::EditorPlugin,
     scene::{commands::graph::AddModelCommand, GameScene},
     Editor,
 };
@@ -368,12 +369,14 @@ impl EditorPlugin for PresidentFusePanel {
             return;
         }
 
-        let scene_data = editor.scenes.current_scene_entry_mut().and_then(|entry| {
+        let scene_data = {
+            let entry = editor.scenes.current_scene_entry_mut();
+            let sender = entry.sender.clone();
             entry
                 .controller
                 .downcast_mut::<GameScene>()
-                .map(|scene| (scene.scene, entry.sender.clone()))
-        });
+                .map(|scene| (scene.scene, sender))
+        };
         let Some((scene_handle, sender)) = scene_data else {
             self.pending_model = None;
             self.set_status(editor, "Open a 3D scene before placing this model.");
