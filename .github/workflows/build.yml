@@ -1,0 +1,27 @@
+name: Build check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  editor-check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Install Linux development libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev libxcb1-dev libxkbcommon-dev libasound2-dev libegl-mesa0 build-essential
+      - name: Check formatting
+        run: cargo fmt --manifest-path app/president_fuse/Cargo.toml --all -- --check
+      - name: Check editor project
+        run: cargo check --locked --manifest-path app/president_fuse/Cargo.toml --package editor

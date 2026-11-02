@@ -1,0 +1,15 @@
+
+[package]
+name = "editor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fyrox = { workspace = true }
+fyroxed_base = { workspace = true }
+president_fuse = { path = "../game", optional = true }
+open = "5.4"
+
+[features]
+default = ["president_fuse", "fyroxed_base/default"]
+dylib = ["fyroxed_base/dylib_engine"]
