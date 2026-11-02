@@ -1,3 +1,4 @@
+use fyrox::asset::Resource;
 use fyrox::core::pool::Handle;
 use fyrox::gui::{
     button::{Button, ButtonBuilder, ButtonMessage},
@@ -14,9 +15,19 @@ use fyrox::gui::{
     window::{Window, WindowAlignment, WindowBuilder, WindowMessage, WindowTitle},
     Orientation,
 };
-use fyroxed_base::{plugin::EditorPlugin, Editor};
+use fyrox::resource::model::{Model, ModelResourceExtension};
+use fyroxed_base::{
+    plugin::{ApplicationLoopController, EditorPlugin},
+    scene::{commands::graph::AddModelCommand, GameScene},
+    Editor,
+};
 use president_fuse::product::{AssetKind, ProjectManifest};
 use std::path::PathBuf;
+
+struct PendingModelImport {
+    resource: Resource<Model>,
+    name: String,
+}
 
 #[derive(Clone, Copy)]
 enum DialogPurpose {
@@ -38,6 +49,7 @@ pub struct PresidentFusePanel {
     project_dir: Option<PathBuf>,
     manifest: Option<ProjectManifest>,
     selected_asset_kind: AssetKind,
+    pending_model: Option<PendingModelImport>,
 }
 
 impl PresidentFusePanel {
@@ -118,9 +130,25 @@ impl PresidentFusePanel {
                     Ok(asset) => match manifest.save(project_dir) {
                         Ok(()) => {
                             let detail = if matches!(purpose, DialogPurpose::AnimationFile) {
-                                "Animation file copied into the project library. Clip parsing and rig retargeting are not wired yet."
+                                "Animation file copied into the project library. Clip parsing and rig retargeting are not wired yet.".to_owned()
+                            } else if matches!(
+                                asset
+                                    .source_path
+                                    .extension()
+                                    .and_then(|value| value.to_str()),
+                                Some("glb" | "gltf" | "fbx")
+                            ) {
+                                let resource = editor
+                                    .engine
+                                    .resource_manager
+                                    .request::<Model>(&asset.source_path);
+                                self.pending_model = Some(PendingModelImport {
+                                    resource,
+                                    name: asset.name.clone(),
+                                });
+                                "Saved in the library. Loading into the active scene…".to_owned()
                             } else {
-                                "Asset copied into the project library. Scene placement is the next workflow step."
+                                "Saved in the library. This file type is not supported for scene placement.".to_owned()
                             };
                             self.set_status(editor, format!("{} — {detail}", asset.name));
                         }
@@ -329,4 +357,36 @@ impl EditorPlugin for PresidentFusePanel {
             }
         }
     }
+
+    fn on_update(&mut self, editor: &mut Editor, _loop_controller: ApplicationLoopController<'_>) {
+        let Some(pending) = self.pending_model.as_ref() else {
+            return;
+        };
+
+        let loaded = pending.resource.state().data().is_some();
+        if !loaded {
+            return;
+        }
+
+        let scene_data = editor.scenes.current_scene_entry_mut().and_then(|entry| {
+            entry
+                .controller
+                .downcast_mut::<GameScene>()
+                .map(|scene| (scene.scene, entry.sender.clone()))
+        });
+        let Some((scene_handle, sender)) = scene_data else {
+            self.pending_model = None;
+            self.set_status(editor, "Open a 3D scene before placing this model.");
+            return;
+        };
+        let name = pending.name.clone();
+        let scene = &mut editor.engine.scenes[scene_handle];
+        let instance = pending.resource.instantiate(scene);
+        scene.graph[instance].set_name(name.clone());
+        let sub_graph = scene.graph.take_reserve_sub_graph(instance);
+        sender.do_command(AddModelCommand::new(sub_graph));
+        self.set_status(editor, format!("Loaded {name} into the active scene."));
+        self.pending_model = None;
+    }
 }
+
