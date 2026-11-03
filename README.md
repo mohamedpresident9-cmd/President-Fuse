@@ -24,11 +24,19 @@ The current editor can create a starter cube, import supported GLB/glTF/FBX mode
 
 ## Build check
 
-The `editor` project is checked on Windows and Linux by GitHub Actions. Tagged versions build a Windows NSIS installer and Linux `.deb` and AppImage packages, then publish them as GitHub Releases. Installers are unsigned until signing credentials are configured.
+The `editor` project is checked on Windows and Linux by GitHub Actions. Tagged versions build a Windows NSIS installer (`.exe`), Linux Arch/Pacman files (a `PKGBUILD` and companion `.tar.gz`), AppImage, and Debian package (`.deb`). Installers are unsigned until signing credentials are configured.
 
 ## Install
 
-Download the Windows `.exe` installer or Linux `.deb`/`.AppImage` file from [GitHub Releases](https://github.com/mohamedpresident9-cmd/President-Fuse/releases). The Linux `.deb` can be installed with the distribution's software installer; for AppImage, mark the file as executable and launch it. Release installers are generated from version tags such as `v0.1.0`.
+Download the matching package from [GitHub Releases](https://github.com/mohamedpresident9-cmd/President-Fuse/releases).
+
+- **Windows:** run the `.exe` installer.
+- **Arch Linux, CachyOS, Archcraft, and other Arch-based systems:** download the `PKGBUILD` and its companion archive into the same directory, inspect the build script, then run `makepkg -si` there.
+- **Bazzite:** Bazzite is based on Fedora Atomic, not Arch. Use the `.AppImage` package and mark it executable; Gear Lever from Bazaar can integrate and manage AppImages.
+- **Debian-based Linux:** install the `.deb` with the distribution's software installer.
+- **Other Linux distributions:** use the `.AppImage` package.
+
+Release installers are generated from version tags such as `v0.1.2`.
 
 ## Initial technology direction
 

@@ -12,7 +12,7 @@ cargo run --package editor --release
 
 The generated project also includes executor and export-cli packages. The editor panel lets a user select a project folder, choose an asset category, create a cube, import GLB/glTF/FBX models into an open 3D scene, or choose an animation file from the computer.
 
-Tagged releases build a Windows NSIS installer and Linux Debian/AppImage packages. The packaged editor locates its bundled starter scene relative to the installed application.
+Tagged releases build a Windows NSIS installer and Linux AppImage, Debian `.deb`, and Arch Pacman `PKGBUILD`/archive packages. The packaged editor locates its bundled starter scene relative to the installed application.
 
 ## Project metadata and domain model
 
