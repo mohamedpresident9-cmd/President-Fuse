@@ -8,6 +8,7 @@ out-dir = "dist"
 binaries-dir = "dist"
 binaries = [{ path = "editor", main = true }]
 resources = [{ src = "data/scene.rgs", target = "president-fuse/data/scene.rgs" }]
+icons = ["icons/icon.png"]
 formats = ["deb", "appimage"]
 
 [deb]
