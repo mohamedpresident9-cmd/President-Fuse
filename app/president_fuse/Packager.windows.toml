@@ -1,6 +1,6 @@
 name = "editor"
 product-name = "President Fuse"
-version = "0.1.0"
+version = "0.1.2"
 identifier = "com.mohamedpresident9.presidentfuse"
 publisher = "President Fuse"
 category = "GraphicsAndDesign"
@@ -11,4 +11,4 @@ resources = [{ src = "data/scene.rgs", target = "president-fuse/data/scene.rgs" 
 formats = ["nsis"]
 
 [nsis]
-install-mode = "currentUser"
+installMode = "currentUser"
